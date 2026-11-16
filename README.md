@@ -1,6 +1,10 @@
 # Swapper AI Agent Toolkit
 
-The payment layer for AI agents. Deposit funds, swap tokens, and manage wallets — directly from your AI agent or coding assistant.
+Swapper helps perp DEXs, prediction markets and other onchain apps onboard new users faster and turn more of them into funded accounts.
+
+## Now for your AI agent
+
+Before an agent can trade, place a bet, or open a position, its account needs funds. This toolkit gives your agent a way to fund it: the agent generates a Swapper deposit link, you confirm it, and the funds arrive where the agent needs them.
 
 Works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.com), [Windsurf](https://windsurf.com), [OpenClaw](https://openclaw.com), [GitHub Copilot](https://copilot.github.com), [CrewAI](https://crewai.com), [AutoGPT](https://autogpt.net), and any AI agent framework that supports the open skills standard.
 
@@ -16,11 +20,11 @@ npx skills add swapperfinance/swapper-toolkit
 
 ### `/swapper-deposit` — Direct Deposit
 
-Deposit and bridge funds into wallets and DeFi protocols. Card, wallet, or crypto transfer — straight into the protocol.
+Deposit and bridge funds into wallets and trading accounts. Card, wallet, or crypto transfer — straight to the address where the funds are needed.
 
 - Direct deposits to any wallet address
 - Cross-chain bridge transfers via Chainlink CCIP
-- Protocol deposits — lending, staking, liquidity pools
+- Account funding — top up a trading account or wallet before a trade, bet, or position
 - Fiat on-ramp — Mastercard, Visa, Apple Pay, Google Pay (170+ countries)
 
 **Triggers when:**
@@ -32,19 +36,22 @@ Deposit and bridge funds into wallets and DeFi protocols. Card, wallet, or crypt
 **Example:**
 
 ```
-User: "Deposit $100 USDC into Aave on Base"
+User: "Open a $100 ETH long on Hyperliquid"
+
+Agent: the account has no USDC on Hyperliquid, so it needs funds first.
 
 Swapper Deposit Skill:
-→ Chain: Base (8453)
+→ Wallet: 0x2A01...c28A
+→ Network: Hypercore (hypercore)
 → Token: USDC
-→ Protocol: Aave
-→ Amount: $100
 → Opening deposit link...
 
-✓ Deposit link generated. Confirm in your browser.
+✓ Deposit link generated. Confirm in your browser. Once the funds arrive, the agent opens the position.
 ```
 
-**Supported chains:** Ethereum, Base, Arbitrum, Optimism, Polygon, Fast, Solana, HyperEVM, BNB Chain, Avalanche
+**Supported networks** include Ethereum, Base, Arbitrum, Optimism, Polygon, BNB Chain, Avalanche, HyperEVM, Monad, Solana, Bitcoin, Tron, Hypercore and more. Full list: https://swapper.finance/api/v1/chains
+
+Bitcoin and Tron work as payment sources: users can pay from them (crypto transfer via QR), but they can't be the deposit destination.
 
 ### `/swapper-trade` — Token Swap *(Coming Soon)*
 
@@ -81,9 +88,21 @@ openSwapperModal({
   dstTokenAddr: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   depositWalletAddress: "0xYourWalletAddress",
   styles: { themeMode: "dark" },
-  supportedDepositOptions: ["transferCrypto", "depositWithCash"],
+  supportedDepositOptions: ["transferCrypto", "depositWithCash", "walletDeposit"],
 });
 ```
+
+`supportedDepositOptions` sets which funding methods the widget shows. Without it, the widget shows the three defaults. A list **replaces** the defaults, so include every method you want to keep:
+
+| Option                  | Default | What it does                                                        |
+|-------------------------|---------|---------------------------------------------------------------------|
+| `transferCrypto`        | on      | Crypto transfer to a deposit address (QR), from any wallet or exchange, including Bitcoin, Solana and Tron |
+| `depositWithCash`       | on      | Card / fiat on-ramp                                                 |
+| `walletDeposit`         | on      | Payment from a connected wallet                                     |
+| `depositFromPolymarket` | off     | The user's balance on Polymarket                                    |
+| `depositFromPerps`      | off     | The user's balance on a perps venue (Hyperliquid, Lighter)          |
+
+`integratorId` is optional. Get your own at https://swapper.finance/dashboard: it works right away, and Swapper verifies new projects (integrator-fee payouts start after verification).
 
 ## Safety
 
@@ -100,8 +119,14 @@ openSwapperModal({
 
 ## Documentation
 
-- [Full docs](https://docs.swapper.finance/ai-agents/skills)
+- [Docs](https://docs.swapper.finance)
+- [Docs for AI agents (llms.txt)](https://docs.swapper.finance/llms.txt)
 - [Swapper Finance](https://swapper.finance)
+
+## Related
+
+- [`@swapper-finance/deposit-sdk`](https://www.npmjs.com/package/@swapper-finance/deposit-sdk) — TypeScript SDK for embedding the deposit widget, with a typed client for the Swapper API v1
+- [`@swapper-finance/orderly-universal-deposits`](https://www.npmjs.com/package/@swapper-finance/orderly-universal-deposits) — Universal Deposits plugin for Orderly DEXes
 
 ## License
 
